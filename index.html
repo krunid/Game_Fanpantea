@@ -3,180 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สุดยอดแฟนพันธุ์แท้วรรณคดีไทย</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>แฟนพันธุ์แท้วรรณคดีไทย</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             text-align: center;
-            padding: 20px;
-            background-color: #f4f4f9;
+            background-color: #f9f4e8;
             color: #333;
+            margin: 0;
+            padding: 0;
         }
-        #dashboard {
-            background-color: #4caf50;
-            color: white;
-            padding: 10px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            font-weight: bold;
+
+        #app {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        #hint-board {
+
+        #game-board {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             margin: 20px 0;
         }
-        .hint-tile {
-            width: 120px;
-            height: 120px;
-            margin: 10px;
-            background-color: #ddd;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1em;
-            color: #666;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .hint-tile.open {
-            background-color: #4caf50;
-            color: white;
-        }
-        .hint-tile:hover {
-            transform: scale(1.05);
-        }
-        #choices-area {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100%;
+    #game-board div {
+        width: 100px; /* ความกว้างของกรอบ */
+        height: 100px; /* ความสูงของกรอบ */
+        margin: 5px;
+        background-color: #ff4d4d; /* สีแดงสด */
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 0.9em; /* ลดขนาดตัวอักษรให้พอดี */
+        text-align: center; /* ข้อความอยู่กลางกรอบ */
+        padding: 5px;
+        border-radius: 12px; /* มุมกรอบโค้งมน */
+        cursor: pointer;
+        user-select: none;
+        transition: transform 0.2s ease, background-color 0.2s ease; /* เพิ่มแอนิเมชัน */
+    }
+
+    #game-board div:hover {
+        background-color: #e60000; /* เปลี่ยนสีเมื่อชี้เมาส์ */
+        transform: scale(1.1); /* ขยายกรอบเล็กน้อยเมื่อชี้ */
+    }
+
+    #hint-area {
+        margin: 20px 0;
+        font-size: 1em; /* ลดขนาดข้อความคำใบ้ */
+        font-weight: bold;
+        word-wrap: break-word; /* บังคับตัดคำถ้ายาวเกิน */
+        color: #333; /* สีข้อความ */
+    }
+
+    button {
+        padding: 10px 20px;
+        margin: 10px;
+        border: none;
+        border-radius: 12px; /* ปุ่มมุมโค้งมน */
+        background-color: #ff4d4d; /* สีแดงสด */
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.2s ease, transform 0.2s ease; /* เพิ่มแอนิเมชัน */
+    }
+
+    button:hover {
+        background-color: #e60000; /* สีเข้มขึ้นเมื่อชี้เมาส์ */
+        transform: scale(1.05); /* ขยายเล็กน้อยเมื่อชี้ */
+    }
+        #result {
             margin: 20px 0;
+            font-size: 1.5em;
+            color: green;
         }
-        .choice-btn {
-            padding: 10px 20px;
-            margin: 10px 0;
-            border: 2px solid #4caf50;
-            border-radius: 12px;
-            background-color: white;
-            color: #333;
-            font-size: 1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            width: 100%;
-            max-width: 300px;
-            min-width: 200px;
-            text-align: center;
-        }
-        .choice-btn:hover {
-            background-color: #d4edda;
-            transform: scale(1.05);
-        }
-    </style>
+    #guess-input {
+        width: 80%; /* ขยายความกว้าง */
+        padding: 10px; /* เพิ่มพื้นที่ภายใน */
+        margin: 10px 0; /* เพิ่มระยะห่าง */
+        border: 2px solid #ff4d4d; /* ขอบสีแดงสด */
+        border-radius: 12px; /* มุมโค้งมน */
+        font-size: 1em; /* ขนาดฟอนต์เหมาะสม */
+        outline: none; /* ลบเส้นขอบสีฟ้าของเบราว์เซอร์ */
+        transition: border-color 0.3s ease, box-shadow 0.3s ease; /* เพิ่มแอนิเมชัน */
+    }
+
+    #guess-input:focus {
+        border-color: #e60000; /* เปลี่ยนสีขอบเมื่อโฟกัส */
+        box-shadow: 0 0 10px #ff4d4d; /* เพิ่มแสงรอบๆ */
+    }
+
+    #guess-input::placeholder {
+        color: #999; /* สีข้อความ placeholder */
+        font-style: italic; /* สไตล์เอียง */
+    }
+  </style>
 </head>
 <body>
-    <div id="dashboard">คะแนนสะสม: <span id="score-display">0</span> คะแนน</div>
-    <h1>สุดยอดแฟนพันธุ์แท้วรรณคดีไทย</h1>
-    <div id="hint-board"></div>
-    <div id="choices-area"></div>
-
+    <div id="app">
+        <h1>เปิดป้ายทายตัวละครวรรณคดีไทย</h1>
+        <div id="game-board">
+            <!-- ป้ายคำใบ้จะอยู่ที่นี่ -->
+        </div>
+        <button id="reveal-btn">เปิดป้าย</button>
+        <div id="hint-area"></div>
+        <input type="text" id="guess-input" placeholder="พิมพ์คำตอบของคุณ">
+        <button id="submit-btn">ส่งคำตอบ</button>
+        <div id="result"></div>
+    </div>
     <script>
-        const literature = [
-            { name: "รามเกียรติ์", hints: ["เป็นเรื่องราวในมหากาพย์รามายณะ", "ตัวละครหลักคือพระราม", "ศัตรูคือทศกัณฐ์"] },
-            { name: "พระอภัยมณี", hints: ["แต่งโดยสุนทรภู่", "ตัวละครสำคัญคือพระอภัยมณี", "มีปี่ที่สามารถสะกดคนและสัตว์ได้"] },
-            { name: "ลิลิตตะเลงพ่าย", hints: ["กล่าวถึงชัยชนะของสมเด็จพระนเรศวรมหาราช", "เกี่ยวกับยุทธหัตถี", "มีความสำคัญในประวัติศาสตร์ไทย"] },
+        // ตัวละคร 10 ตัวอย่าง
+        const characters = [
+            {
+                name: "พระอภัยมณี",
+                hints: [
+                    "มีขลุ่ยเป็นอาวุธ",
+                    "ถูกนางผีเสื้อสมุทรจับตัวไป",
+                    "เดินทางกับสินสมุทรและนางเงือก",
+                    "เป็นเจ้าชายจากกรุงรัตนา",
+                    "เป็นผู้มีปัญญาและความสามารถ",
+                ]
+            },
+            {
+                name: "นางสีดา",
+                hints: [
+                    "ภรรยาของพระราม",
+                    "ถูกทศกัณฐ์ลักพาตัว",
+                    "ผ่านการพิสูจน์ด้วยไฟ",
+                    "เป็นสตรีผู้มีคุณธรรมสูงส่ง",
+                    "เกิดจากการไถดินของพระราชา"
+                ]
+            },
+            {
+                name: "หนุมาน",
+                hints: [
+                    "วานรผู้จงรักภักดีต่อพระราม",
+                    "สามารถแปลงกายได้",
+                    "มีฤทธิ์มหาศาล",
+                    "มีลักษณะเป็นสีขาว",
+                    "เป็นผู้บัญชาการกองทัพลิง"
+                ]
+            },
+            {
+                name: "ทศกัณฐ์",
+                hints: [
+                    "เป็นกษัตริย์แห่งกรุงลงกา",
+                    "มีสิบหน้าและยี่สิบกร",
+                    "ลักพาตัวนางสีดา",
+                    "ถูกสังหารโดยพระราม",
+                    "เป็นยักษ์ที่มีความหลงรักและความแค้น"
+                ]
+            },
+            {
+                name: "พระลักษมณ์",
+                hints: [
+                    "น้องชายของพระราม",
+                    "ผู้จงรักภักดีและเสียสละ",
+                    "ถูกศรนาคบาศทำร้าย",
+                    "ร่วมเดินทางกับพระรามและนางสีดา",
+                    "มีบุคลิกสงบเสงี่ยมและกล้าหาญ"
+                ]
+            },
+            {
+                name: "นางเงือก",
+                hints: [
+                    "ช่วยพระอภัยมณีหลบหนี",
+                    "เป็นแม่ของสินสมุทร",
+                    "มีร่างเป็นครึ่งคนครึ่งปลา",
+                    "มีความรักและเสียสละ",
+                    "มีความสามารถว่ายน้ำในทะเลได้เก่ง"
+                ]
+            },
+            {
+                name: "สินสมุทร",
+                hints: [
+                    "ลูกชายของพระอภัยมณีและนางเงือก",
+                    "เป็นเด็กที่มีพละกำลังมหาศาล",
+                    "ร่วมเดินทางผจญภัยกับพระอภัยมณี",
+                    "เกิดจากความรักระหว่างมนุษย์และเงือก",
+                    "มีความกล้าหาญและจงรักภักดี"
+                ]
+            },
+            {
+                name: "พระราม",
+                hints: [
+                    "เป็นอวตารของพระนารายณ์",
+                    "กษัตริย์แห่งกรุงอโยธยา",
+                    "สามีของนางสีดา",
+                    "สังหารทศกัณฐ์เพื่อช่วยนางสีดา",
+                    "ใช้ศรศักดิ์สิทธิ์เป็นอาวุธ"
+                ]
+            },
+            {
+                name: "พระอินทร์",
+                hints: [
+                    "เป็นราชาแห่งสวรรค์",
+                    "ขี่ช้างเอราวัณ",
+                    "เป็นผู้ช่วยเหลือมนุษย์ในยามยาก",
+                    "มีพระวรกายสีเขียว",
+                    "มีอาวุธคือสายฟ้า"
+                ]
+            },
+            {
+                name: "นางผีเสื้อสมุทร",
+                hints: [
+                    "ยักษ์ผู้หลงรักพระอภัยมณี",
+                    "จับตัวพระอภัยมณีไปอยู่เกาะ",
+                    "เลี้ยงดูพระอภัยมณีด้วยความรัก",
+                    "แปลงร่างเป็นหญิงสาวสวย",
+                    "ถูกพระอภัยมณีหลอกให้จากไป"
+                ]
+            }
         ];
+    let currentCharacter = null;
+    let hintIndex = 0;
+    let revealedHints = []; // เก็บคำใบ้ที่ถูกเปิดป้าย
 
-        let currentLiterature = null;
-        let score = 0;
-
-        function updateDashboard() {
-            document.getElementById("score-display").textContent = score;
+    // สุ่มตัวละคร
+    function startGame() {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        currentCharacter = characters[randomIndex];
+        hintIndex = 0;
+        revealedHints = []; // ล้างคำใบ้ก่อนเริ่มเกมใหม่
+        document.getElementById('hint-area').textContent = '';
+        document.getElementById('result').textContent = '';
+        document.getElementById('game-board').innerHTML = '';
+        for (let i = 0; i < currentCharacter.hints.length; i++) {
+            const tile = document.createElement('div');
+            tile.textContent = '?';
+            tile.dataset.index = i;
+            document.getElementById('game-board').appendChild(tile);
         }
+    }
 
-        function startGame() {
-            const randomIndex = Math.floor(Math.random() * literature.length);
-            currentLiterature = literature[randomIndex];
-            document.getElementById("hint-board").innerHTML = "";
-            document.getElementById("choices-area").innerHTML = "";
+    // เปิดแผ่นป้าย
+    document.getElementById('reveal-btn').addEventListener('click', () => {
+        if (hintIndex < currentCharacter.hints.length) {
+            const tiles = document.querySelectorAll('#game-board div');
+            tiles[hintIndex].textContent = currentCharacter.hints[hintIndex];
 
-            createHintBoard();
-            generateChoices();
+            // เพิ่มคำใบ้ที่เปิดป้ายลงในรายการคำใบ้ที่แสดงผล
+            revealedHints.push(currentCharacter.hints[hintIndex]);
+
+            // อัปเดตพื้นที่แสดงคำใบ้ทั้งหมด
+            document.getElementById('hint-area').innerHTML = revealedHints.map(
+                (hint, index) => `<div>คำใบ้ ${index + 1}: ${hint}</div>`
+            ).join('');
+            hintIndex++;
+        } else {
+            document.getElementById('hint-area').textContent = "หมดคำใบ้แล้ว!";
         }
+    });
 
-        function createHintBoard() {
-            const hintBoard = document.getElementById("hint-board");
-            currentLiterature.hints.forEach((hint, index) => {
-                const tile = document.createElement("div");
-                tile.className = "hint-tile";
-                tile.textContent = "?";
-                tile.dataset.index = index;
-                tile.addEventListener("click", () => revealHint(tile, index));
-                hintBoard.appendChild(tile);
-            });
+    // ตรวจคำตอบ
+    document.getElementById('submit-btn').addEventListener('click', () => {
+        const guess = document.getElementById('guess-input').value.trim();
+        if (guess === currentCharacter.name) {
+            document.getElementById('result').textContent = "ถูกต้อง! คุณเก่งมาก!";
+        } else {
+            document.getElementById('result').textContent = "ผิด! ลองอีกครั้ง";
         }
+    });
 
-        function revealHint(tile, index) {
-            if (!tile.classList.contains("open")) {
-                tile.classList.add("open");
-                tile.textContent = currentLiterature.hints[index];
-            }
-        }
-
-        function generateChoices() {
-            const choices = [currentLiterature.name];
-            while (choices.length < 4) {
-                const randomLiterature = literature[Math.floor(Math.random() * literature.length)];
-                if (!choices.includes(randomLiterature.name)) {
-                    choices.push(randomLiterature.name);
-                }
-            }
-            shuffleArray(choices);
-
-            const choicesArea = document.getElementById("choices-area");
-            choices.forEach(choice => {
-                const button = document.createElement("button");
-                button.textContent = choice;
-                button.className = "choice-btn";
-                button.addEventListener("click", () => checkAnswer(choice));
-                choicesArea.appendChild(button);
-            });
-        }
-
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-        }
-
-        function checkAnswer(selectedAnswer) {
-            if (selectedAnswer === currentLiterature.name) {
-                score += 100;
-                Swal.fire({
-                    icon: "success",
-                    title: "ถูกต้อง!",
-                    text: `คุณได้ 100 คะแนน รวมคะแนน: ${score} คะแนน`,
-                    confirmButtonText: "เล่นข้อต่อไป",
-                }).then(() => {
-                    updateDashboard();
-                    startGame();
-                });
-            } else {
-                Swal.fire({
-                    icon: "error",
-                    title: "ผิด!",
-                    text: "ลองอีกครั้ง!",
-                    confirmButtonText: "ตกลง",
-                });
-            }
-        }
-
-        startGame();
-    </script>
+    // เริ่มเกมเมื่อโหลดหน้า
+    startGame();
+</script>
 </body>
 </html>
