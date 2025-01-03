@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สุดยอดแฟนพันธุ์แท้วรรณคดีไทย</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        #dashboard {
+            background-color: #4caf50;
+            color: white;
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        #hint-board {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .hint-tile {
+            width: 120px;
+            height: 120px;
+            margin: 10px;
+            background-color: #ddd;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1em;
+            color: #666;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .hint-tile.open {
+            background-color: #4caf50;
+            color: white;
+        }
+        .hint-tile:hover {
+            transform: scale(1.05);
+        }
+        #choices-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            margin: 20px 0;
+        }
+        .choice-btn {
+            padding: 10px 20px;
+            margin: 10px 0;
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            background-color: white;
+            color: #333;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            width: 100%;
+            max-width: 300px;
+            min-width: 200px;
+            text-align: center;
+        }
+        .choice-btn:hover {
+            background-color: #d4edda;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboard">คะแนนสะสม: <span id="score-display">0</span> คะแนน</div>
+    <h1>สุดยอดแฟนพันธุ์แท้วรรณคดีไทย</h1>
+    <div id="hint-board"></div>
+    <div id="choices-area"></div>
+
+    <script>
+        const literature = [
+            { name: "รามเกียรติ์", hints: ["เป็นเรื่องราวในมหากาพย์รามายณะ", "ตัวละครหลักคือพระราม", "ศัตรูคือทศกัณฐ์"] },
+            { name: "พระอภัยมณี", hints: ["แต่งโดยสุนทรภู่", "ตัวละครสำคัญคือพระอภัยมณี", "มีปี่ที่สามารถสะกดคนและสัตว์ได้"] },
+            { name: "ลิลิตตะเลงพ่าย", hints: ["กล่าวถึงชัยชนะของสมเด็จพระนเรศวรมหาราช", "เกี่ยวกับยุทธหัตถี", "มีความสำคัญในประวัติศาสตร์ไทย"] },
+        ];
+
+        let currentLiterature = null;
+        let score = 0;
+
+        function updateDashboard() {
+            document.getElementById("score-display").textContent = score;
+        }
+
+        function startGame() {
+            const randomIndex = Math.floor(Math.random() * literature.length);
+            currentLiterature = literature[randomIndex];
+            document.getElementById("hint-board").innerHTML = "";
+            document.getElementById("choices-area").innerHTML = "";
+
+            createHintBoard();
+            generateChoices();
+        }
+
+        function createHintBoard() {
+            const hintBoard = document.getElementById("hint-board");
+            currentLiterature.hints.forEach((hint, index) => {
+                const tile = document.createElement("div");
+                tile.className = "hint-tile";
+                tile.textContent = "?";
+                tile.dataset.index = index;
+                tile.addEventListener("click", () => revealHint(tile, index));
+                hintBoard.appendChild(tile);
+            });
+        }
+
+        function revealHint(tile, index) {
+            if (!tile.classList.contains("open")) {
+                tile.classList.add("open");
+                tile.textContent = currentLiterature.hints[index];
+            }
+        }
+
+        function generateChoices() {
+            const choices = [currentLiterature.name];
+            while (choices.length < 4) {
+                const randomLiterature = literature[Math.floor(Math.random() * literature.length)];
+                if (!choices.includes(randomLiterature.name)) {
+                    choices.push(randomLiterature.name);
+                }
+            }
+            shuffleArray(choices);
+
+            const choicesArea = document.getElementById("choices-area");
+            choices.forEach(choice => {
+                const button = document.createElement("button");
+                button.textContent = choice;
+                button.className = "choice-btn";
+                button.addEventListener("click", () => checkAnswer(choice));
+                choicesArea.appendChild(button);
+            });
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function checkAnswer(selectedAnswer) {
+            if (selectedAnswer === currentLiterature.name) {
+                score += 100;
+                Swal.fire({
+                    icon: "success",
+                    title: "ถูกต้อง!",
+                    text: `คุณได้ 100 คะแนน รวมคะแนน: ${score} คะแนน`,
+                    confirmButtonText: "เล่นข้อต่อไป",
+                }).then(() => {
+                    updateDashboard();
+                    startGame();
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "ผิด!",
+                    text: "ลองอีกครั้ง!",
+                    confirmButtonText: "ตกลง",
+                });
+            }
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
